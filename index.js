@@ -11,7 +11,6 @@ var aliyunStream = require('aliyun-oss-upload-stream');
 
 var fs = require("fs");
 var Moment = require('moment');
-var Q = require('q');
 
 function oss(option) {
     if (!option) {
@@ -30,6 +29,58 @@ function oss(option) {
 
     var version = Moment().format('YYMMDDHHmm');
 
+    var listfn = [];
+    var maxUpCount = option.maxUpCount || 10;
+    var _count = 0;
+    var maxErrCount = option.maxErrCount || 5;
+    var fnMap = {};
+
+    var getFileKey = function(option, file){
+        return option.prefix
+            + ((!option.prefix || option.prefix[option.prefix.length - 1]) === '/' ? '' : '/')
+            + (option.versioning ? version + '/' : '')
+            + path.relative(file.base, file.path).replace(/\\/g, "/");
+    };
+
+    var getUpfileFn = function(fileKey, file, option){
+        return function(){
+            _count ++;
+            var upload = ossStream.upload({
+                Bucket: option.bucket,
+                Key: fileKey
+            });
+            upload.on('error', function (error) {
+                log('ERR:', colors.red(fileKey + "\t" + error.code));
+                var obj = fnMap[fileKey];
+                if(obj){
+                    if(obj.errCount > maxErrCount){
+                        log('ERR:', colors.red(fileKey + "\t" + error.code));
+                    }else{
+                        obj.errCount ++;
+                        obj.fn();
+                        log('reset up:', colors.red(fileKey + "\t" + obj.errCount));
+                    }
+                }
+            });
+
+            upload.on('part', function (part) {
+                // console.log('part:', part);
+            });
+
+            upload.on('uploaded', function (details) {
+                log('uploaded:', colors.green(fileKey));
+                _count--;
+                if (_count < maxUpCount) {
+                    var fn = listfn.shift();
+                    if (fn) fn();
+                }
+            });
+
+            var read = fs.createReadStream(file.clone().path);
+            read.pipe(upload);
+        };
+    };
+
     return through2.obj(function (file, enc, cb) {
         if(file.isDirectory()) return cb();
         if(file.isStream()) {
@@ -40,33 +91,17 @@ function oss(option) {
             log('WRN:', colors.red(file.path + "\t" + file.contents.length));
             return cb();
         }
-        var getFileKey = function(){
-            return option.prefix
-                + ((!option.prefix || option.prefix[option.prefix.length - 1]) === '/' ? '' : '/')
-                + (option.versioning ? version + '/' : '')
-                + path.relative(file.base, file.path).replace(/\\/g, "/");
-        };
-        var uploadFile = function(fileKey){
-            var upload = ossStream.upload({
-                Bucket: option.bucket,
-                Key: fileKey
-            });
-            upload.on('error', function (error) {
-                log('ERR:', colors.red(fileKey + "\t" + err.code));
-            });
 
-            upload.on('part', function (part) {
-                // console.log('part:', part);
-            });
+        var key = getFileKey(option, file);
+        var fn = getUpfileFn(key, file.clone(), option);
+        fnMap[key] = {errCount:0, fn:fn};
 
-            upload.on('uploaded', function (details) {
-                log('uploaded:', colors.green(fileKey));
-            });
+        if (_count < maxUpCount) {
+            fn();
+        } else {
+            listfn.push(fn);
+        }
 
-            var read = fs.createReadStream(file.clone().path);
-            read.pipe(upload);
-        };
-        Q.fcall(getFileKey).then(uploadFile);
         this.push(file);
         return cb();
     });

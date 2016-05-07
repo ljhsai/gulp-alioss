@@ -16,7 +16,9 @@ gulp.task('oss', function(){
         endpoint: 'http://oss-cn-***.aliyuncs.com',
         apiVersion: '2013-10-15',
         prefix: 'assets/js',
-        bucket: 'test'
+        bucket: 'test',
+        maxUpCount: 10, //最大上传文件数，default 10
+        maxErrCount: 5  //上传失败重试次数，default 5
     };
     //./js/a.js -> <prefix>/a.js
     // ......
@@ -32,8 +34,8 @@ gulp oss
 [14:50:59] Using gulpfile ~/path/to/gulpfile.js
 [14:50:59] Starting 'oss'...
 [14:50:59] Finished 'oss' after *** ms
-[14:50:59] OK: assets/a.js
-[14:50:59] OK: assets/b/a.js
+[14:50:59] uploaded: assets/a.js
+[14:50:59] uploaded: assets/b/a.js
 ....
 ```
 

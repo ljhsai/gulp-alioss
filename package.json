@@ -18,7 +18,6 @@
     "minimatch": "^2.0.4",
     "moment": "~2.7.0",
     "through2": "~0.4.0",
-    "q": "~1.0.0",
     "aliyun-sdk": "~1.3.5",
     "aliyun-oss-upload-stream": "^1.2.1"
   },
