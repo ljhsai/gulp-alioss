@@ -3,7 +3,7 @@ Aliyun Oss Client for Gulp
 
 ### Install
 ``` bash
-npm install gulp-alioss
+npm install gulp-alioss-stream
 ```
 ### DEMO
 ``` node
