@@ -7,6 +7,9 @@ var PluginError = require('gulp-util').PluginError;
 var colors = require('gulp-util').colors;
 var log = require('gulp-util').log;
 var ALY = require('aliyun-sdk');
+var aliyunStream = require('aliyun-oss-upload-stream');
+
+var fs = require("fs");
 var Moment = require('moment');
 var Q = require('q');
 
@@ -18,12 +21,12 @@ function oss(option) {
         throw new PluginError(PLUGIN_NAME, 'Missing option.bucket!');
     }
 
-    //var ossClient = new ALY.OSS({
-    //    accessKeyId: option.accessKeyId,
-    //    secretAccessKey: option.secretAccessKey,
-    //    endpoint: option.endpoint,
-    //    apiVersion: option.apiVersion
-    //});
+    var ossStream = aliyunStream(new ALY.OSS({
+        accessKeyId: option.accessKeyId,
+        secretAccessKey: option.secretAccessKey,
+        endpoint: option.endpoint,
+        apiVersion: option.apiVersion ||  '2013-10-15'
+    }));
 
     var version = Moment().format('YYMMDDHHmm');
 
@@ -41,34 +44,27 @@ function oss(option) {
             return option.prefix
                 + ((!option.prefix || option.prefix[option.prefix.length - 1]) === '/' ? '' : '/')
                 + (option.versioning ? version + '/' : '')
-                + path.relative(file.base, file.path);
+                + path.relative(file.base, file.path).replace(/\\/g, "/");
         };
         var uploadFile = function(fileKey){
-            ossClient = new ALY.OSS({
-                accessKeyId: option.accessKeyId,
-                secretAccessKey: option.secretAccessKey,
-                endpoint: option.endpoint,
-                apiVersion: option.apiVersion
+            var upload = ossStream.upload({
+                Bucket: option.bucket,
+                Key: fileKey
             });
-            ossClient.putObject({
-                    Bucket: option.bucket,
-                    Key: fileKey,
-                    Body: file.contents,
-                    AccessControlAllowOrigin: '',
-                    CacheControl: 'no-cache',
-                    ContentDisposition: '',
-                    ContentEncoding: 'utf-8',
-                    ServerSideEncryption: 'AES256',
-                    Expires: Moment().unix()
-                }, function (err, data) {
-                    if (err) {
-                        console.log('error:', err);
-                        log('ERR:', colors.red(fileKey + "\t" + err.code));
-                    }else{
-                        log('OK:', colors.green(fileKey));
-                    }
-                }
-            );
+            upload.on('error', function (error) {
+                log('ERR:', colors.red(fileKey + "\t" + err.code));
+            });
+
+            upload.on('part', function (part) {
+                // console.log('part:', part);
+            });
+
+            upload.on('uploaded', function (details) {
+                log('uploaded:', colors.green(fileKey));
+            });
+
+            var read = fs.createReadStream(file.clone().path);
+            read.pipe(upload);
         };
         Q.fcall(getFileKey).then(uploadFile);
         this.push(file);

@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/wefound/gulp-alioss"
+    "url": "https://github.com/ljhsai/gulp-alioss"
   },
   "engines": {
     "node": "*"
@@ -19,7 +19,8 @@
     "moment": "~2.7.0",
     "through2": "~0.4.0",
     "q": "~1.0.0",
-    "aliyun-sdk": "~1.3.5"
+    "aliyun-sdk": "~1.3.5",
+    "aliyun-oss-upload-stream": "^1.2.1"
   },
   "keywords": [
     "gulp",
@@ -30,7 +31,7 @@
   "author": "junqiang <mail@junqiang.wang> (http://junqiang.wang)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wefound/gulp-alioss/issues"
+    "url": "https://github.com/ljhsai/gulp-alioss/issues"
   },
-  "homepage": "https://github.com/wefound/gulp-alioss"
+  "homepage": "https://github.com/ljhsai/gulp-alioss"
 }
