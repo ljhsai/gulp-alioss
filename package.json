@@ -1,6 +1,6 @@
 {
   "name": "gulp-alioss-stream",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A plugin for Gulp that uploads files to Aliyun OSS",
   "main": "index.js",
   "scripts": {
@@ -25,9 +25,10 @@
     "gulp",
     "plugin",
     "aliyun",
-    "oss"
+    "oss",
+    "stream"
   ],
-  "author": "junqiang <mail@junqiang.wang> (http://junqiang.wang)",
+  "author": "luson <ljhxai@163.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ljhsai/gulp-alioss/issues"

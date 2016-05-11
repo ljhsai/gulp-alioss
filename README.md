@@ -1,4 +1,4 @@
-# gulp-oss
+# gulp-alioss-stream
 Aliyun Oss Client for Gulp
 
 ### Install
@@ -8,7 +8,7 @@ npm install gulp-alioss-stream
 ### DEMO
 ``` node
 var gulp = require('gulp');
-var oss = require('gulp-alioss');
+var oss = require('gulp-alioss-stream');
 gulp.task('oss', function(){
     var options = {
         accessKeyId: '********',
