@@ -1,6 +1,6 @@
 {
   "name": "gulp-alioss-stream",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A plugin for Gulp that uploads files to Aliyun OSS",
   "main": "index.js",
   "scripts": {
