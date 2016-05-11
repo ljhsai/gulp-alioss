@@ -36,6 +36,7 @@ gulp oss
 [14:50:59] Finished 'oss' after *** ms
 [14:50:59] uploaded: assets/a.js
 [14:50:59] uploaded: assets/b/a.js
+[14:50:59] total: 5 success: 5 fail: 0
 ....
 ```
 
